@@ -120,7 +120,7 @@ def login_view():
 
 @main.route("/login/")
 def login():
-    return current_app.discord.create_session(scope=['identify', 'guilds'])
+    return current_app.discord.create_session(scope=["identify", "guilds"])
 
 
 @main.route("/callback/")

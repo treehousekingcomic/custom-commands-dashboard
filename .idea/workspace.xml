@@ -18,6 +18,11 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Shahriyar\Desktop\Flask App" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="Flask App" type="PythonConfigurationType" factoryName="Python">
       <module name="Flask App" />
@@ -50,11 +55,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1605123938149</updated>
-      <workItem from="1605123939174" duration="396000" />
+      <workItem from="1605123939174" duration="878000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="418" y="166" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1605124573114">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="418" y="166" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.728@0.0.1366.728" timestamp="1605124573114" />
   </component>
 </project>

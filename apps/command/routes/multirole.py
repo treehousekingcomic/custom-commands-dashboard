@@ -39,6 +39,7 @@ def edit_multirole(server_id):
             }
 
         from .config import reserved_words
+
         for word in reserved_words:
             if command_name.startswith(word) or word + " " in command_name:
                 return {
