@@ -1,0 +1,41 @@
+import psycopg2
+import os
+
+# Because i am not going to use SqlAlchemy
+db = psycopg2.connect(host="localhost", database="ccbeta", user="shah", password="shah")
+
+
+class Config:
+    SECRET_KEY = "your_top_secret_key"
+    DISCORD_CLIENT_ID = 724847752449753140
+    DISCORD_CLIENT_SECRET = "CFT6XxsYPOL90LKSkA5AGGqtpBZq8sYtc92"
+    DISCORD_BOT_TOKEN = "Zyu^5zxaDQ3NzUyNDQ5sd12MTQw.XvGJEw.uofYtI5OxZqX_SH7ajnhjsdS^"
+    DISCORD_REDIRECT_URI = "127.0.0.1:5000/callback"
+
+    DB = db.cursor()
+    CONN = db
+
+    @staticmethod
+    def init_app(app):
+        pass
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
+
+
+class TestingConfig(Config):
+    TESTING = True
+
+
+class ProductionConfig(Config):
+    pass
+
+
+config = {
+    "development": DevelopmentConfig,
+    "testing": TestingConfig,
+    "production": ProductionConfig,
+    "default": DevelopmentConfig,
+}

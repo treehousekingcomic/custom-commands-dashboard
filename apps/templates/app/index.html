@@ -1,0 +1,34 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Custom Commands{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col">
+                <div class="jumbotron">
+                    <h1 class="display-4">Custom Command</h1>
+                    <p class="lead">Welcome to the world of custom commands. No limit and endless posibility.</p>
+                    <hr class="my-4">
+                    <p>Start making command now</p>
+                    <p class="lead">
+                        {% if not current_app.discord.authorized %}
+                            <a class="btn btn-primary btn-lg" href="{{ url_for('main.login') }}" role="button">Login</a>
+                        {% else %}
+                            <a class="btn btn-primary btn-lg" href="{{ url_for('main.servers') }}" role="button">Go to dashboard</a>
+                        {% endif %}
+                    </p>
+                </div>
+            </div> <!-- Col -->
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

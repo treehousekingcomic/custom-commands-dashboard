@@ -1,0 +1,22 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Logged out{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col text-center">
+                <h1 class="display-1">Logged Out</h1><br>
+                <a href="{{ url_for('main.login') }}" class="btn btn-success">Login</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Servers{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12 text-center">
+                <p class="text-danger ">Servers are not showing or outdated data? Logout and login everything will be fixed</p>
+            </div>
+
+            {% for data, guild, command_count, var_count in servers %}
+                <div class="col-sm-12 col-md-6 col-lg-6">
+                    <div class="card p-3">
+                        <div class="d-flex align-items-center">
+                            <div class="image"> <img src="{{ guild.icon_url }}" alt="server icon" class="rounded" width="155"> </div>
+                            <div class="ml-3 w-100">
+                                <h4 class="mb-0 mt-0">{{ guild.name }}</h4>
+                                <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats">
+                                    <div class="d-flex flex-column"> <span class="articles">Commands</span> <span class="number1">{{ command_count if data or 'NA' }}</span> </div>
+                                    <div class="d-flex flex-column"> <span class="followers">Variables</span> <span class="number2">{{ var_count if data or 'NA' }}</span> </div>
+                                </div>
+                                {% if data %}
+                                    <div class="button mt-2 d-flex flex-row align-items-center"> <a href="{{ url_for('main.manage_server', server_id=guild.id) }}" class="btn btn-sm btn-primary w-100">Manage</a></div>
+                                {% else %}
+                                    <div class="button mt-2 d-flex flex-row align-items-center"> <a href="{{ url_for('main.invite_bot', server_id=guild.id) }}" class="btn btn-sm btn-outline-primary w-100">Invite Bot</a></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

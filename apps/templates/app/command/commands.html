@@ -1,0 +1,191 @@
+{% extends 'app/base.html' %}
+{% import 'macros/macro.html' as macro %}
+
+{% block title %}Dashboard - {{ server.name }}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col">
+
+                {{ macro.render_dashboard_nav('commands', server) }}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    If you dont see a <strong>Edit</strong> button in actions, means you are not the owner of that command
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <form class="searchform">
+                    <div class="form-group">
+                        <input type="text" class="form-control search" placeholder="Search">
+                    </div>
+                </form>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Approved</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody class="commands">
+                        {% for command in commands %}
+                            <tr>
+
+                                <td>{{ command[3] }}</td>
+                                <td>{{ command[4] }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm unapprove {% if command[6] == 'no' %}d-none{% endif %}" data-id="{{ command[0] }}">Unapprove</button>
+                                    <button class="btn btn-success btn-sm approve {% if command[6] == 'yes' %}d-none{% endif %}" data-id="{{ command[0] }}">Approve</button>
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-danger btn-sm delete" data-id="{{ command[0] }}">Delete</a>
+                                    <a href="{{ url_for('command.view_command', server_id=server.id, command_id=command[0]) }}" class="btn btn-primary btn-sm" data-id="{{ command[0] }}">View</a>
+
+                                    {% if command[1] == current_app.discord.fetch_user().id %}
+                                        <a href="{{ url_for('command.edit_command', server_id=server.id, command_id=command[0]) }}" class="btn btn-warning btn-sm">Edit</a>
+                                    {% endif %}
+
+
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div> <!-- Col -->
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        const button = document.querySelector('.commands')
+        const searchform = document.querySelector('.searchform')
+        const search = document.querySelector('.search')
+
+        search.addEventListener('keyup', e => {
+            const query = e.target.value
+            const commands = document.querySelector('.commands')
+            const rows = Array.from(commands.children)
+
+            rows.filter((row) => !row.textContent.includes(query))
+                .forEach(row => row.classList.add('d-none'))
+
+            rows.filter((row) => row.textContent.includes(query))
+                .forEach(row => row.classList.remove('d-none'))
+
+        })
+
+        searchform.addEventListener('submit', e => e.preventDefault())
+
+
+
+        button.addEventListener('click', e => {
+            if(e.target.tagName === 'A' && e.target.classList.contains('delete')){
+                e.preventDefault()
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const id = e.target.getAttribute('data-id')
+
+                        const url = '{{ url_for('command.delete_command', server_id=server.id) }}'
+
+                        fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id,
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data['error'] !== null){
+                                alertify.error(data['error']['message']);
+                            }else{
+                                e.target.parentElement.parentElement.remove()
+                                Swal.fire(
+                                    'Deleted!',
+                                    data['data']['message'],
+                                    'success'
+                                )
+                            }
+                        })
+
+                    }
+                })
+            }
+
+            if(e.target.tagName === 'BUTTON' && e.target.classList.contains('unapprove')){
+                const id = e.target.getAttribute('data-id')
+                const parent = e.target.parentElement
+                const approveButton = parent.querySelector('.approve')
+
+                const url = '{{ url_for('command.unapprove_command', server_id=server.id) }}'
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id,
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data['error'] !== null){
+                        alertify.error(data['error']['message']);
+                    }else{
+                        e.target.classList.add('d-none')
+                        approveButton.classList.remove('d-none')
+                        alertify.warning(data['data']['message'])
+                    }
+                })
+            }
+
+            if(e.target.tagName === 'BUTTON' && e.target.classList.contains('approve')){
+                const id = e.target.getAttribute('data-id')
+                const parent = e.target.parentElement
+                const unapproveButton = parent.querySelector('.unapprove')
+
+                const url = '{{ url_for('command.approve_command', server_id=server.id) }}'
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id,
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data['error'] !== null){
+                        alertify.error(data['error']['message']);
+                    }else{
+                        e.target.classList.add('d-none')
+                        unapproveButton.classList.remove('d-none')
+                        alertify.success(data['data']['message'])
+                    }
+                })
+            }
+        })
+    </script>
+{% endblock %}

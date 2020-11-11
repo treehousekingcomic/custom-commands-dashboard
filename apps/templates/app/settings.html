@@ -1,0 +1,82 @@
+{% extends 'app/base.html' %}
+{% import 'macros/macro.html' as macro %}
+
+{% block title %}Settings - {{ server.name }}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col">
+
+                {{ macro.render_dashboard_nav('settings', server) }}
+
+                <h4>Giverole command</h4>
+                <form class="text-form">
+                    <div class="form-group">
+                        <label>Bot Command Prefix</label>
+                        <input type="text" class="form-control" value="{{ settings[2] }}" maxlength="20" name="pprefix" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Custom Command Prefix</label>
+                        <input aria-describedby="cphelp" type="text" value="{{ settings[4] or '' }}" class="form-control" maxlength="20" name="cprefix">
+                        <small class="form-text text-warning" id="cphelp">Only if you want different prefix for custom command and different for bot commands</small>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="checkbox" name="noprefix" value="x" {% if settings[3] == 'yes' %}checked{% endif %}>
+                        <label>No Prefix?</label>
+                    </div>
+
+                    <input type="submit" name="submit" value="Update settings" class="btn btn-success">
+                </form>
+            </div> <!-- Col -->
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        const form = document.querySelector('.text-form')
+        form.addEventListener('submit', e => {
+            e.preventDefault()
+            const prefix = form.pprefix.value.trimLeft()
+            const cprefix = form.cprefix.value.trimLeft() ? form.cprefix.value.trimLeft() : null
+            const noprefix = form.noprefix.checked
+
+            console.log(prefix, cprefix, noprefix)
+
+            if(prefix === ''){
+                alertify.error('Prefix is required');
+            }else{
+                const url = '{{ url_for('command.edit_settings', server_id=server.id) }}'
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prefix,
+                        cprefix,
+                        noprefix
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data['error'] !== null){
+                        alertify.error(data['error']['message']);
+                    }else{
+                        alertify.success(data['data']['message'])
+                    }
+                })
+            }
+        })
+    </script>
+{% endblock %}

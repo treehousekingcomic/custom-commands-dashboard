@@ -1,0 +1,61 @@
+{% extends 'app/base.html' %}
+{% import 'macros/macro.html' as macro %}
+
+{% block title %}Dashboard - {{ server.name }}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-sm-12 col-md-8 col-lg-8">
+
+                {{ macro.render_dashboard_nav('create', server) }}
+
+                <h4>{{ command_name }} <span class="badge badge-info">{% if command_type == 'give and remove' %}role{% else %}{{ command_type }}{% endif %}</span></h4>
+                <br>
+
+                {% if command_type == 'text' %}
+                    <b>Content : </b> <p>{{ cmd_info[2] }}</p>
+                {% elif command_type == 'embed' %}
+                    <b>Title : </b> {{ cmd_info[2] }} <br><br>
+                    <b>Description : </b> <br>{{ cmd_info[3] }} <br><br>
+                    <b>Thumbnail : </b> {{ cmd_info[4] or None }} <br><br>
+                    <b>Image : </b> {{ cmd_info[5] or None }} <br>
+                {% elif command_type == 'random' %}
+                    <b>Content : </b> <p>{{ " | ".join(cmd_info[2]) }}</p>
+
+                {% elif command_type == 'role' %}
+                    <b>Action : </b> {% if cmd_info[3] == 'give' %} {{ cmd_info[3]|capitalize }} role {% elif cmd_info[3] == 'take'%} Remove role {% else %}Toggle role{% endif %}<br><br>
+                    <b>Roles : </b>
+                    {% for id in cmd_info[2] %}
+                        @{{ get_role(id) }} {{ ',' if loop.index0 < (loop.length - 1) }}
+                    {% endfor %}
+
+                {% elif command_type == 'give and remove' %}
+                    <b>Action :</b> {{ command_type|capitalize }}<br><br>
+                    <b>Gives : </b>
+                    {% for id in cmd_info[2] %}
+                        @{{ get_role(id) }} {{ ',' if loop.index0 < (loop.length - 1) }}
+                    {% endfor %}
+                        <br><br>
+                    <b>Removes : </b>
+                    {% for id in cmd_info[3] %}
+                        @{{ get_role(id) }} {{ ',' if loop.index0 < (loop.length - 1) }}
+                    {% endfor %}
+                {% endif %}
+
+            </div> <!-- Col -->
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+
+    </script>
+{% endblock %}

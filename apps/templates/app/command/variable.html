@@ -1,0 +1,162 @@
+{% extends 'app/base.html' %}
+{% import 'macros/macro.html' as macro %}
+
+{% block title %}Dashboard - {{ server.name }}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-sm-12 col-md-8 col-lg-8">
+
+                {{ macro.render_dashboard_nav('create', server) }}
+
+                <h4>Variables</h4>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody class="variables">
+
+                        {% for var in variables %}
+                            <tr>
+                                <td>{{ var[1] }}</td>
+                                <td>{{ var[2] }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-danger btn-sm delete" data-id="{{ var[0] }}">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div> <!-- Col -->
+
+            <div class="col-sm-12 col-md-4 col-lg-4 mt-sm-4">
+                <form class="text-form">
+                    <label>Name</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">{</div>
+                        </div>
+                        <input type="text" class="form-control" name="name" placeholder="name" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Value</label>
+                        <textarea class="form-control" name="vvalue" rows="3" maxlength="1900" required></textarea>
+                    </div>
+
+                    <input type="submit" name="submit" value="Create variable" class="btn btn-primary">
+                </form>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        const form = document.querySelector('.text-form')
+        const variables = document.querySelector('.variables')
+
+        variables.addEventListener('click', e => {
+            if(e.target.tagName === 'A' && e.target.classList.contains('delete')){
+                e.preventDefault()
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const id = e.target.getAttribute('data-id')
+
+                        const url = '{{ url_for('command.delete_variable', server_id=server.id) }}'
+
+                        fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id,
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data['error'] !== null){
+                                alertify.error(data['error']['message']);
+                            }else{
+                                e.target.parentElement.parentElement.remove()
+                                Swal.fire(
+                                    'Deleted!',
+                                    data['data']['message'],
+                                    'success'
+                                )
+                            }
+                        })
+
+                    }
+                })
+            }
+        })
+
+        form.addEventListener('submit', event => {
+            event.preventDefault()
+            const name = form.name.value.trim()
+            const value = form.vvalue.value.trim()
+
+            if(name === '' || value === ''){
+                alertify.error('Please fill all data');
+            }else{
+                const url = '{{ url_for('command.variable_view', server_id=server.id) }}'
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        value
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data['error'] !== null){
+                        alertify.error(data['error']['message']);
+                    }else{
+                        alertify.success(data['data']['message'])
+                        form.reset()
+
+                        variables.innerHTML += `
+                        <tr>
+                                <td>{${name}}</td>
+                                <td>${value}</td>
+                                <td>
+                                    <a href="#" class="btn btn-danger btn-sm delete" data-id="${data['data']['variable_id']}">Delete</a>
+                                </td>
+                            </tr>
+                        `
+                    }
+                })
+            }
+        })
+    </script>
+{% endblock %}

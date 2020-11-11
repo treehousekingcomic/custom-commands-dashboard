@@ -1,0 +1,104 @@
+{% extends 'app/base.html' %}
+{% import 'macros/macro.html' as macro %}
+
+{% block title %}Dashboard - {{ server.name }}{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-sm-12 col-md-8 col-lg-8">
+
+                {{ macro.render_dashboard_nav('create', server) }}
+
+                <h4>Give and Remove role command</h4>
+                <form class="text-form">
+                    <div class="form-group">
+                        <label>Command Name</label>
+                        <input type="text" class="form-control namefield" id="exampleFormControlInput1" maxlength="20" value="{{ command_name }}" name="commandname" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Will give</label>
+                        <select name="gives" id="gives" multiple style="width: 100%;">
+                            {% for role in roles %}
+                                <option value="{{ role[3] }}">{{ role[2] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Will remove</label>
+                        <select name="removes" id="removes" multiple style="width: 100%;">
+                            {% for role in roles %}
+                                <option value="{{ role[3] }}">{{ role[2] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class="text-danger">Bot will not check if the bot has permission to add roles. Either give bot specific permission to add roles. Or give the bot admin. Also keep bots role on top of the other roles</p>
+                    <input type="submit" name="submit" value="Create Command" class="btn btn-success">
+                </form>
+            </div> <!-- Col -->
+
+            <div class="col-sm-12 col-md-4 col-lg-4 mt-sm-4">
+                {{ macro.render_vars(variables) }}
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        const form = document.querySelector('.text-form')
+        console.log(form)
+        form.addEventListener('submit', event => {
+            event.preventDefault()
+            const name = form.commandname.value.trim()
+            const gives = $(form.gives).val()
+            const removes = $(form.removes).val()
+            const id = {{ cmd_info[1] }}
+
+            if(name === '' || gives.length < 1 || removes.length < 1){
+                alertify.error('Please fill all data');
+            }else{
+                const url = '{{ url_for('command.edit_multirole', server_id=server.id) }}'
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id,
+                        name,
+                        gives,
+                        removes
+                    })
+                })
+                .then(res => {
+                    console.log(res)
+                    return res.json()
+                })
+                .then(data => {
+                    if(data['error'] !== null){
+                        alertify.error(data['error']['message']);
+                    }else{
+                        alertify.success(data['data']['message'])
+                    }
+                }).catch(e => {
+                    alert(e)
+                })
+            }
+        })
+
+        $(document).ready(function (){
+            $('#gives').chosen()
+            $('#removes').chosen()
+        })
+    </script>
+{% endblock %}

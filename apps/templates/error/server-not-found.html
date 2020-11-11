@@ -1,0 +1,22 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Unknown server{% endblock %}
+
+{% block head %}
+    {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col text-center">
+                <div class="alert alert-danger">Server not found!</div>
+                <a href="{{ url_for('main.servers') }}" class="btn btn-success">Servers</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

@@ -1,0 +1,123 @@
+{% macro render_navbar(current_app, user) %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Custom Commands</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <a href="https://custom-commands-is.the-be.st/#/" target="_blank" class="nav-link">Docs</a>
+                {% if not current_app.discord.authorized %}
+                    <li class="navbar-item">
+                        <a href="{{ url_for('main.login') }}" class="nav-link">Login</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <div class="dropdown">
+                            <button type="button" class="btn dropdown-toggle text-white" data-toggle="dropdown">
+                                <img src="{{ user.avatar_url or user.default_avatar_url }}" class="avatar rounded-circle" alt="Cinque Terre">
+                                {{ user.name }}
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{{ url_for('main.servers') }}">Servers</a>
+                                <a class="dropdown-item" href="{{ url_for('main.logout') }}">Logout</a>
+                            </div>
+                        </div>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+{% endmacro %}
+
+{% macro render_paginator(paginator) %}
+    {% if paginator['links'] %}
+        <nav aria-label="page navigation" class="mt-5 text-center">
+            <ul class="pagination">
+                {% if paginator['prev_link'] %}
+                    <li class="page-item"><a href="?page={{ paginator['prev_link'] }}" class="page-link">Previous</a></li>
+                {% endif %}
+                {% for link in paginator['links'] %}
+                    <li class="page-item {% if link == paginator['page'] %}active{% endif %}"><a href="{% if link == paginator['page'] %}#{% else %}?page={{ link }}{% endif %}" class="page-link">{{ link }}</a></li>
+                {% endfor %}
+                {% if paginator['next_link'] %}
+                    <li class="page-item"><a href="?page={{ paginator['next_link'] }}" class="page-link">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_dashboard_nav(current_page, server) %}
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link {% if current_page == 'commands' %}active{% endif %}" href="{% if current_page == 'commands' %}#{% else %}{{ url_for('main.manage_server', server_id=server.id) }}{% endif %}">Commands</a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% if current_page == 'create' %}active{% endif %}" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Create</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="{{ url_for('command.create_text', server_id=server.id) }}">Text</a>
+                <a class="dropdown-item" href="{{ url_for('command.create_random', server_id=server.id) }}">Random</a>
+                <a class="dropdown-item" href="{{ url_for('command.create_embed', server_id=server.id) }}">Embed</a>
+                <a class="dropdown-item" href="{{ url_for('command.create_giverole', server_id=server.id) }}">Give role</a>
+                <a class="dropdown-item" href="{{ url_for('command.create_removerole', server_id=server.id) }}">Remove role</a>
+                <a class="dropdown-item" href="{{ url_for('command.create_togglerole', server_id=server.id) }}">Toggle role</a>
+                <a class="dropdown-item" href="{{ url_for('command.create_giveandremove', server_id=server.id) }}">Give and Remove role</a>
+                <a class="dropdown-item" href="{{ url_for('command.variable_view', server_id=server.id) }}">Variables</a>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('command.edit_settings', server_id=server.id) }}">Settings</a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('main.servers') }}" class="nav-link btn btn-sm" href="#">{{ server.name }} <span class="badge badge-dark">Change server</span></a>
+        </li>
+    </ul>
+    <br>
+{% endmacro %}
+
+{% macro render_vars(variables) %}
+    <h3>Variables</h3>
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Server</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Predefined</a>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+            <br>
+            <div style="width:100%;height:80vh;overflow: scroll;overflow-x: hidden;overflow-y: hidden;" class="predef1">
+                {% for var in variables %}
+                    <b>{{ var[1] }}</b> {{ " - " + var[2] }} <br>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+            <div style="width:100%;height:80vh;overflow: scroll;overflow-x: hidden;overflow-y: hidden;" class="predef2">
+                <b>{user}</b> - Will mention the command author<br>
+                <b>{user_id}</b> - Message author id<br>
+                <b>{user_avatar}</b> - Message author avatar url<br>
+                <b>{server}</b> - server name.<br>
+                <b>{server_owner}</b> - server owner name.<br>
+                <b>{server_id}</b> - server id.<br>
+                <b>{server_logo}</b> - server logo url.<br>
+                <b>{server_locale}</b> - Server current locale.<br>
+                <b>{members}</b> - Server member count.<br>
+                <b>{level}</b> - Server boost level.<br>
+                <b>{boosts}</b> - Server boost count.<br>
+                <b>{boosters}</b> - Server booster count.<br>
+                <b>{text_channels}</b> - Server text channels count.<br>
+                <b>{voice_channels}</b> - Server voice channels count.<br>
+                <b>{total_channels}</b> - Server all channel count.<br>
+                <b>{categories}</b> - Server category count.<br>
+                <b>{roles}</b> - Server role count.<br>
+                <b>{level}</b> - Server boost level<br>
+                <b>{emojis}</b> - Server emoji count.<br>
+                <b>{emoji_limit}</b> - Server maximum emoji limit.<br>
+                <b>{filesize_limit}</b> - Server maximum file upload limit (MB).
+            </div>
+        </div>
+    </div>
+
+{% endmacro %}
